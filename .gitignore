@@ -1,7 +1,10 @@
 .env
 .venv/
+.azure/
 __pycache__/
 *.pyc
 documento_tecnico.txt
 *.pyo
 .DS_Store
+DEPLOY_AZURE.md
+.vscode/
