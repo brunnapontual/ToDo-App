@@ -2,6 +2,8 @@
 
 Aplicação web de lista de tarefas (Todo App) desenvolvida com **Python + FastAPI**, hospedada no **Azure App Service** e com banco de dados **Azure Database for PostgreSQL**.
 
+**App em produção:** https://todo-app-cloud.azurewebsites.net
+
 ## Arquitetura
 
 ```
