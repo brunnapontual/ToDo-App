@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tasks</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #fafafa;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 4rem 1rem;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 520px;
+    }
+
+    .header {
+      margin-bottom: 2.5rem;
+    }
+
+    .header-top {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 0.25rem;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #111;
+      letter-spacing: -0.02em;
+    }
+
+    .stats {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #999;
+      letter-spacing: 0.01em;
+    }
+
+    .progress-bar {
+      height: 2px;
+      background: #ebebeb;
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 0.75rem;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #111;
+      border-radius: 2px;
+      transition: width 0.3s ease;
+    }
+
+    .add-form {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .add-form input {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      border: 1px solid #e5e5e5;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      color: #111;
+      background: #fff;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .add-form input::placeholder { color: #bbb; }
+
+    .add-form input:focus {
+      border-color: #111;
+      box-shadow: 0 0 0 3px rgba(17,17,17,0.06);
+    }
+
+    .btn-add {
+      padding: 0.75rem 1.25rem;
+      background: #111;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s;
+    }
+
+    .btn-add:hover { background: #333; }
+
+    .task-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.875rem 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .task-item:last-child { border-bottom: none; }
+
+    .task-checkbox {
+      flex-shrink: 0;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 1.5px solid #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .task-item.done .task-checkbox {
+      background: #111;
+      border-color: #111;
+    }
+
+    .task-checkbox svg {
+      display: none;
+    }
+
+    .task-item.done .task-checkbox svg {
+      display: block;
+    }
+
+    .task-title {
+      flex: 1;
+      font-size: 0.9rem;
+      color: #111;
+      font-weight: 400;
+      line-height: 1.4;
+      transition: color 0.15s;
+    }
+
+    .task-item.done .task-title {
+      color: #bbb;
+      text-decoration: line-through;
+      text-decoration-color: #ccc;
+    }
+
+    .btn-delete {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      background: none;
+      border: none;
+      border-radius: 6px;
+      color: #ccc;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.15s, color 0.15s, background 0.15s;
+      font-family: inherit;
+      line-height: 1;
+    }
+
+    .task-item:hover .btn-delete { opacity: 1; }
+    .btn-delete:hover { color: #111; background: #f0f0f0; }
+
+    .empty {
+      text-align: center;
+      color: #ccc;
+      padding: 3rem 0;
+      font-size: 0.875rem;
+      font-weight: 400;
+    }
+
+    .empty-icon {
+      font-size: 1.5rem;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <div class="header">
+      <div class="header-top">
+        <h1>Tarefas</h1>
+        {% if tasks %}
+          {% set done_count = tasks | selectattr('done') | list | length %}
+          <span class="stats">{{ done_count }} / {{ tasks | length }}</span>
+        {% endif %}
+      </div>
+      {% if tasks %}
+        {% set done_count = tasks | selectattr('done') | list | length %}
+        {% set pct = (done_count / tasks | length * 100) | round | int %}
+        <div class="progress-bar">
+          <div class="progress-fill" data-width="{{ pct }}"></div>
+        </div>
+      {% endif %}
+    </div>
+
+    <form class="add-form" method="post" action="/tasks">
+      <input
+        type="text"
+        name="title"
+        placeholder="Nova tarefa..."
+        required
+        maxlength="200"
+        autocomplete="off"
+        autofocus
+      />
+      <button class="btn-add" type="submit">Adicionar</button>
+    </form>
+
+    {% if tasks %}
+      <ul class="task-list">
+        {% for task in tasks %}
+        <li class="task-item {{ 'done' if task.done else '' }}">
+
+          <form method="post" action="/tasks/{{ task.id }}/toggle" style="display:contents">
+            <button type="submit" class="task-checkbox" title="{{ 'Desfazer' if task.done else 'Concluir' }}">
+              <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                <path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </form>
+
+          <span class="task-title">{{ task.title }}</span>
+
+          <form method="post" action="/tasks/{{ task.id }}/delete" style="display:contents">
+            <button class="btn-delete" type="submit" title="Excluir">×</button>
+          </form>
+
+        </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="empty">
+        <span class="empty-icon">○</span>
+        Nenhuma tarefa ainda
+      </p>
+    {% endif %}
+
+  </div>
+  <script>
+    document.querySelectorAll('.progress-fill[data-width]').forEach(el => {
+      el.style.width = el.dataset.width + '%';
+    });
+  </script>
+</body>
+</html>
